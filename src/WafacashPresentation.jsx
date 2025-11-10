@@ -337,19 +337,26 @@ const slideDeck = [
     background: 'white',
     title: 'Démonstration — Dashboard de suivi PayCash',
     image: `${process.env.PUBLIC_URL}/dashboard-screenshot.png`,
-    demoHighlights: [
-      'Filtrage par adhérent, date et statut en direct',
-      'Statuts visuels : Validé, En cours, Rejeté',
-      'Actions rapides : Détails, export, reçus PDF',
-    ],
-    export: {
-      title: 'Démo Dashboard',
-      bullets: [
-        'Supervision temps réel des fichiers reçus',
-        'Filtres avancés et statuts visuels',
-        'Accès rapide aux détails et exports PDF',
-      ],
-    },
+  },
+  {
+    id: 'demo-dashboard',
+    template: 'demo',
+    background: 'white',
+    title: 'Démonstration — Dashboard de suivi PayCash',
+    image: `${process.env.PUBLIC_URL}/detail-screenshot.png`,
+    // demoHighlights: [
+    //   'Filtrage par adhérent, date et statut en direct',
+    //   'Statuts visuels : Validé, En cours, Rejeté',
+    //   'Actions rapides : Détails, export, reçus PDF',
+    // ],
+    // export: {
+    //   title: 'Démo Dashboard',
+    //   bullets: [
+    //     'Supervision temps réel des fichiers reçus',
+    //     'Filtres avancés et statuts visuels',
+    //     'Accès rapide aux détails et exports PDF',
+    //   ],
+    // },
   },
   {
     id: 'demo-pdf',
@@ -357,29 +364,6 @@ const slideDeck = [
     background: 'white',
     title: 'Génération automatique des reçus PDF',
     image: `${process.env.PUBLIC_URL}/receipt-screenshot.png`,
-    receipt: {
-      metadata: [
-        'Référence : REF-2025-001',
-        'Concessionnaire : Auto Premium',
-        'Date : 14/11/2025 10:30',
-        'Lignes traitées : 120',
-      ],
-      stats: [
-        '115 validées',
-        '5 rejetées',
-        '287 500 MAD traités',
-        'Statut global : TRAITÉ',
-      ],
-      badge: 'Validé par Wafacash',
-    },
-    export: {
-      title: 'Reçus PDF Automatiques',
-      bullets: [
-        'Reçus professionnels générés pour chaque lot',
-        'Statistiques consolidées (volumes, montants)',
-        'Validation officielle Wafacash',
-      ],
-    },
   },
   {
     id: 'sequence',
