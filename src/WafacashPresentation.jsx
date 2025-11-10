@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import './WafacashPresentation.css';
 
 const PALETTE = {
@@ -1261,11 +1261,11 @@ const WafacashPresentation = () => {
   const totalSlides = slides.length;
   const activeSlide = slides[currentSlide];
 
-  const goTo = (index) => {
+  const goTo = useCallback((index) => {
     if (index >= 0 && index < totalSlides) {
       setCurrentSlide(index);
     }
-  };
+  }, [totalSlides]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -1304,7 +1304,7 @@ const WafacashPresentation = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [currentSlide, totalSlides]);
+  }, [currentSlide, totalSlides, goTo]);
 
   return (
     <div className="presentation-root">
