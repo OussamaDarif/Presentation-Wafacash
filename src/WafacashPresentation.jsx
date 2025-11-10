@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import './WafacashPresentation.css';
 
@@ -39,7 +39,7 @@ const slideDeck = [
     background: 'black',
     heading: 'Refonte du Module PayCash',
     subheading: 'Intégration en Masse',
-    tagline: "Automatisation & Traçabilité des Paiements d'Immatriculation",
+    tagline: "Dédié Pour Paiements des Frais d'Immatriculation",
     highlights: [
       'Réalisé par : Oussama DARIF',
       'Encadré par : Mme Mouna SAIH / M. Anas NAHILI',
@@ -162,7 +162,7 @@ const slideDeck = [
     stages: [
       { label: 'Concessionnaire', description: 'Fichier Excel transmis', status: 'manual' },
       { label: 'Email Outlook', description: 'Envoi manuel au BO', status: 'manual' },
-      { label: 'Back Office', description: 'Validations ligne à ligne', status: 'manual' },
+      { label: 'Back Office', description: 'Validations format fichier', status: 'manual' },
       { label: 'Répertoire', description: 'Dépôt Binga Masse', status: 'manual' },
     ],
     issues: [
@@ -1294,227 +1294,8 @@ const SlideRenderer = ({ slide }) => {
   }
 };
 
-const buildPptx = async (slides) => {
-  try {
-    // Vérifier que PptxGenJS est chargé
-    let PptxGenJS = window.PptxGenJS || window.pptxgen;
-    
-    if (!PptxGenJS) {
-      // Attendre un peu pour que le script se charge
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      PptxGenJS = window.PptxGenJS || window.pptxgen;
-    }
-
-    if (!PptxGenJS) {
-      throw new Error(
-        "PptxGenJS n'est pas disponible. Veuillez recharger la page ou vérifier votre connexion internet."
-      );
-    }
-
-    const pptx = new PptxGenJS();
-    pptx.layout = 'LAYOUT_16x9';
-    pptx.author = 'Oussama DARIF';
-    pptx.company = 'Wafacash';
-    pptx.subject = 'Refonte du Module PayCash - Intégration en Masse';
-    pptx.title = 'Refonte du Module PayCash';
-
-    slides.forEach((slide, index) => {
-      const slideObj = pptx.addSlide();
-      
-      // Définir la couleur de fond (format hexadécimal sans #)
-      const bgColor =
-        slide.background === 'black'
-          ? '000000'
-          : slide.background === 'yellow'
-          ? 'FFD100'
-          : 'FFFFFF';
-      
-      slideObj.background = { color: bgColor };
-
-      // Couleurs de texte (format hexadécimal sans #)
-      const textColor = slide.background === 'black' ? 'FFFFFF' : '000000';
-      const subtitleColor = slide.background === 'black' ? 'D9D9D9' : '333333';
-      const accentColor = 'FFD100';
-
-      const content = slide.export || {};
-      let yPos = 0.6;
-
-      // Titre principal
-      if (content.title) {
-        slideObj.addText(content.title, {
-          x: 0.5,
-          y: yPos,
-          w: 9,
-          h: 0.8,
-          fontSize: 32,
-          fontFace: 'Arial',
-          bold: true,
-          color: textColor,
-          align: 'left',
-        });
-        yPos += 1;
-      }
-
-      // Sous-titre
-      if (content.subtitle) {
-        slideObj.addText(content.subtitle, {
-          x: 0.5,
-          y: yPos,
-          w: 9,
-          h: 0.5,
-          fontSize: 22,
-          fontFace: 'Arial',
-          color: subtitleColor,
-          align: 'left',
-        });
-        yPos += 0.7;
-      }
-
-      // Puces
-      if (content.bullets && Array.isArray(content.bullets) && content.bullets.length > 0) {
-        // Filtrer et s'assurer que tous les éléments sont des chaînes
-        const bulletStrings = content.bullets.filter(bullet => typeof bullet === 'string');
-        
-        if (bulletStrings.length > 0) {
-          // Ajouter chaque bullet avec le caractère • pour éviter l'erreur de PptxGenJS
-          bulletStrings.forEach((bullet, idx) => {
-            slideObj.addText(`• ${bullet}`, {
-              x: 0.8,
-              y: yPos + (idx * 0.45),
-              w: 8.5,
-              h: 0.4,
-              fontSize: 16,
-              fontFace: 'Arial',
-              color: textColor,
-            });
-          });
-          yPos += bulletStrings.length * 0.45 + 0.3;
-        }
-      } else if (content.sections && Array.isArray(content.sections)) {
-        // Sections multiples
-        const sectionWidth = 4.2;
-        content.sections.forEach((section, idx) => {
-          const xPos = 0.5 + idx * (sectionWidth + 0.3);
-          if (section.heading) {
-            slideObj.addText(section.heading, {
-              x: xPos,
-              y: yPos,
-              w: sectionWidth,
-              h: 0.4,
-              fontSize: 18,
-              fontFace: 'Arial',
-              bold: true,
-              color: accentColor,
-            });
-          }
-          
-          if (section.items && Array.isArray(section.items) && section.items.length > 0) {
-            // Ajouter chaque item avec le caractère • pour éviter l'erreur
-            section.items.forEach((item, itemIdx) => {
-              if (typeof item === 'string') {
-                slideObj.addText(`• ${item}`, {
-                  x: xPos,
-                  y: yPos + 0.5 + (itemIdx * 0.4),
-                  w: sectionWidth,
-                  h: 0.35,
-                  fontSize: 14,
-                  fontFace: 'Arial',
-                  color: textColor,
-                });
-              }
-            });
-          }
-        });
-      } else {
-        // Contenu par défaut (pour les slides sans export spécifique)
-        const slideTitle = slide.title || slide.heading || `Slide ${index + 1}`;
-        slideObj.addText(slideTitle, {
-          x: 0.5,
-          y: yPos + 0.5,
-          w: 9,
-          h: 0.6,
-          fontSize: 24,
-          fontFace: 'Arial',
-          bold: true,
-          color: textColor,
-          align: 'center',
-        });
-        
-        if (slide.tagline || slide.statement) {
-          slideObj.addText(slide.tagline || slide.statement, {
-            x: 0.5,
-            y: yPos + 1.2,
-            w: 9,
-            fontSize: 16,
-            fontFace: 'Arial',
-            color: subtitleColor,
-            align: 'center',
-          });
-        }
-      }
-
-      // Ajouter les membres du jury pour la page de garde
-      if (slide.template === 'cover' && slide.jury && Array.isArray(slide.jury) && slide.jury.length > 0) {
-        let juryYPos = 5.5;
-        
-        // Titre de la section jury
-        slideObj.addText('Membres du Jury', {
-          x: 0.5,
-          y: juryYPos,
-          w: 9,
-          h: 0.4,
-          fontSize: 14,
-          fontFace: 'Arial',
-          bold: true,
-          color: accentColor,
-          align: 'center',
-        });
-        
-        juryYPos += 0.5;
-        
-        // Ajouter chaque membre du jury
-        slide.jury.forEach((member, idx) => {
-          if (member.name && member.role) {
-            const memberText = `${member.name} - ${member.role}`;
-            slideObj.addText(memberText, {
-              x: 0.5,
-              y: juryYPos + (idx * 0.35),
-              w: 9,
-              h: 0.3,
-              fontSize: 12,
-              fontFace: 'Arial',
-              color: subtitleColor,
-              align: 'center',
-            });
-          }
-        });
-      }
-
-      // Footer
-      slideObj.addText('Wafacash', {
-        x: 8,
-        y: 6.8,
-        w: 1.5,
-        h: 0.3,
-        fontSize: 11,
-        fontFace: 'Arial',
-        color: slide.background === 'black' ? '8C8C8C' : '6B6B6B',
-        align: 'right',
-        italic: true,
-      });
-    });
-
-    // Générer et télécharger le fichier
-    pptx.writeFile({ fileName: 'Wafacash_PayCash_Presentation.pptx' });
-  } catch (error) {
-    console.error('Erreur lors de la génération du PPTX:', error);
-    throw error;
-  }
-};
-
 const WafacashPresentation = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isGenerating, setIsGenerating] = useState(false);
   const slides = useMemo(() => slideDeck, []);
   const totalSlides = slides.length;
   const activeSlide = slides[currentSlide];
@@ -1525,43 +1306,9 @@ const WafacashPresentation = () => {
     }
   };
 
-  const handleDownload = async () => {
-    if (isGenerating) return;
-    
-    try {
-      setIsGenerating(true);
-      await buildPptx(slides);
-    } catch (error) {
-      console.error('Erreur de téléchargement:', error);
-      alert(
-        `Erreur lors de la génération du PPTX: ${error.message}\n\nVérifiez que:\n- La bibliothèque PptxGenJS est bien chargée\n- Votre navigateur autorise les téléchargements\n- Votre connexion internet est active`,
-      );
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   return (
     <div className="presentation-root">
-      <header className="presentation-header">
-        <div className="presentation-header__title">
-          <span style={{ letterSpacing: '0.18em' }}>WAFACASH</span>
-        </div>
-        <div className="presentation-header__meta">
-          Refonte du module PayCash — Intégration en Masse — Oussama DARIF
-        </div>
-        <button 
-          type="button" 
-          className="download-button" 
-          onClick={handleDownload}
-          disabled={isGenerating}
-        >
-          <span className="download-button__icon">
-            <Download size={16} />
-          </span>
-          {isGenerating ? 'Génération...' : 'Télécharger le PPTX'}
-        </button>
-      </header>
+
 
       <main className="presentation-stage">
         <SlideRenderer slide={activeSlide} />
