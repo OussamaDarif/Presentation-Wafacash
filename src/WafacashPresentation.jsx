@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import html2canvas from 'html2canvas';
 import './WafacashPresentation.css';
 
 const PALETTE = {
@@ -985,6 +986,7 @@ const SlideRenderer = ({ slide }) => {
                   src={slide.image}
                   alt="Capture d'écran du dashboard"
                   className="demo-image"
+                  crossOrigin="anonymous"
                   onError={(e) => {
                     e.target.style.display = 'none';
                   }}
@@ -1012,6 +1014,7 @@ const SlideRenderer = ({ slide }) => {
                   src={slide.image}
                   alt="Capture d'écran du reçu PDF"
                   className="receipt-image"
+                  crossOrigin="anonymous"
                   onError={(e) => {
                     e.target.style.display = 'none';
                   }}
@@ -1260,12 +1263,468 @@ const WafacashPresentation = () => {
   const slides = useMemo(() => slideDeck, []);
   const totalSlides = slides.length;
   const activeSlide = slides[currentSlide];
+  const stageRef = useRef(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const goTo = useCallback((index) => {
     if (index >= 0 && index < totalSlides) {
       setCurrentSlide(index);
     }
   }, [totalSlides]);
+
+  const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const loadScript = (src) =>
+    new Promise((resolve, reject) => {
+      const existing = document.querySelector(`script[src="${src}"]`);
+      if (existing) {
+        existing.addEventListener('load', () => resolve());
+        existing.addEventListener('error', (e) => reject(e));
+        // If already loaded
+        if (existing.dataset.loaded === 'true') resolve();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      script.onload = () => {
+        script.dataset.loaded = 'true';
+        resolve();
+      };
+      script.onerror = (e) => reject(e);
+      document.body.appendChild(script);
+    });
+
+  const getJsPDF = async () => {
+    // Always load from CDN to avoid bundling issues
+    if (!(window.jspdf && window.jspdf.jsPDF)) {
+      await loadScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js');
+    }
+    return window.jspdf.jsPDF;
+  };
+
+  const getPptxGen = async () => {
+    // Always load UMD from CDN to avoid bundling Node deps
+    if (!window.PptxGenJS) {
+      await loadScript('https://cdn.jsdelivr.net/npm/pptxgenjs');
+    }
+    return window.PptxGenJS;
+  };
+
+  const downloadBlob = (blob, filename) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const waitForFonts = async () => {
+    if (document && document.fonts && typeof document.fonts.ready?.then === 'function') {
+      try {
+        await document.fonts.ready;
+      } catch {
+        // ignore
+      }
+    }
+  };
+
+  const waitForImages = async (root) => {
+    const images = Array.from(root.querySelectorAll('img'));
+    const promises = images.map(
+      (img) =>
+        new Promise((resolve) => {
+          if (img.complete && img.naturalWidth > 0) return resolve();
+          img.addEventListener('load', () => resolve(), { once: true });
+          img.addEventListener(
+            'error',
+            () => {
+              resolve();
+            },
+            { once: true }
+          );
+        })
+    );
+    await Promise.all(promises);
+  };
+
+  const captureCurrentStageAsImage = async () => {
+    const node = stageRef.current;
+    if (!node) return null;
+
+    // Ensure fonts and images are fully loaded for maximum fidelity
+    await waitForFonts();
+    await waitForImages(node);
+
+    // Use the slide background when capturing to avoid transparency artifacts
+    const computedBg = window.getComputedStyle(node).backgroundColor;
+    const bgColor =
+      computedBg && computedBg !== 'rgba(0, 0, 0, 0)' && computedBg !== 'transparent'
+        ? computedBg
+        : '#ffffff';
+
+    const canvas = await html2canvas(node, {
+      scale: 3,
+      backgroundColor: bgColor,
+      useCORS: true,
+      allowTaint: false,
+      imageTimeout: 15000,
+      logging: false,
+      foreignObjectRendering: false,
+    });
+    return canvas.toDataURL('image/png');
+  };
+
+  const exportAsPdf = async () => {
+    if (totalSlides === 0) return;
+    setIsExporting(true);
+    const filename = 'WafacashPresentation.pdf';
+
+    try {
+      const JsPDFCtor = await getJsPDF();
+      // Prepare a landscape A4 PDF
+      const pdf = new JsPDFCtor({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      const originalIndex = currentSlide;
+      let addedPages = 0;
+
+      for (let i = 0; i < totalSlides; i++) {
+        goTo(i);
+        // Allow React to render before capture (fonts/images are handled in capture)
+        await wait(150);
+        const img = await captureCurrentStageAsImage();
+        if (!img) {
+          continue;
+        }
+        if (addedPages > 0) {
+          pdf.addPage('a4', 'landscape');
+        }
+
+        // Fit image into page while preserving aspect ratio
+        const stage = stageRef.current;
+        const sw = stage.clientWidth || pageWidth;
+        const sh = stage.clientHeight || pageHeight;
+        const stageRatio = sw / sh;
+        const pageRatio = pageWidth / pageHeight;
+
+        let drawW = pageWidth;
+        let drawH = pageHeight;
+        if (stageRatio > pageRatio) {
+          // Constrain by width
+          drawW = pageWidth;
+          drawH = pageWidth / stageRatio;
+        } else {
+          // Constrain by height
+          drawH = pageHeight;
+          drawW = pageHeight * stageRatio;
+        }
+        const x = (pageWidth - drawW) / 2;
+        const y = (pageHeight - drawH) / 2;
+
+        pdf.addImage(img, 'PNG', x, y, drawW, drawH);
+        addedPages += 1;
+      }
+
+      // If nothing was added, bail out gracefully
+      if (addedPages === 0) {
+        setIsExporting(false);
+        return;
+      }
+
+      try {
+        pdf.save(filename);
+      } catch {
+        // Fallback: manual Blob download
+        const blob = pdf.output('blob');
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      } finally {
+        // Restore original slide
+        goTo(originalIndex);
+      }
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const exportAsPptxImage = async () => {
+    if (totalSlides === 0) return;
+    setIsExporting(true);
+    const filename = 'WafacashPresentation.pptx';
+
+    try {
+      const PptxGenJS = await getPptxGen();
+      const pres = new PptxGenJS();
+      // 16:9 layout by default; ensure full-bleed images fill slide
+      for (let i = 0; i < totalSlides; i++) {
+        goTo(i);
+        await wait(150);
+        const img = await captureCurrentStageAsImage();
+        const slide = pres.addSlide();
+        if (img) {
+          slide.addImage({ data: img, x: 0, y: 0, w: '100%', h: '100%' });
+        }
+      }
+      // Try native download; fallback to manual blob download
+      try {
+        await pres.writeFile({ fileName: filename });
+      } catch (e) {
+        // Some environments need a manual blob download
+        if (typeof pres.write === 'function') {
+          // Prefer 'blob' which returns a Blob in browser builds
+          const blob = await pres.write('blob');
+          if (blob) {
+            downloadBlob(blob, filename);
+          } else {
+            // Last resort: arraybuffer
+            const arrayBuffer = await pres.write('arraybuffer');
+            const mime =
+              'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+            const abBlob = new Blob([arrayBuffer], { type: mime });
+            downloadBlob(abBlob, filename);
+          }
+        } else {
+          throw e;
+        }
+      }
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const getSlideThemeColors = (slide) => {
+    const theme = backgroundThemes[slide.background] || backgroundThemes.white;
+    return {
+      bg: theme.background,
+      text: theme.text,
+      accent: PALETTE.yellow,
+    };
+  };
+
+  const addTitleBlock = (pptSlide, text, colors) => {
+    if (!text) return;
+    pptSlide.addText(text, {
+      x: 0.5,
+      y: 0.4,
+      w: 9,
+      h: 1,
+      bold: true,
+      fontSize: 28,
+      color: colors.text,
+    });
+  };
+
+  const addBulletBlock = (pptSlide, items, box, colors) => {
+    if (!items || !items.length) return;
+    pptSlide.addText(
+      items.map((t) => ({ text: t, options: { bullet: true } })),
+      {
+        x: box.x,
+        y: box.y,
+        w: box.w,
+        h: box.h,
+        color: colors.text,
+        fontSize: 16,
+        lineSpacingMultiple: 1.2,
+      }
+    );
+  };
+
+  const exportAsPptx = async () => {
+    if (totalSlides === 0) return;
+    setIsExporting(true);
+    const filename = 'WafacashPresentation (natif).pptx';
+
+    try {
+      const PptxGenJS = await getPptxGen();
+      const pres = new PptxGenJS();
+
+      for (let i = 0; i < totalSlides; i++) {
+        const slideData = slides[i];
+        const pptSlide = pres.addSlide();
+        const colors = getSlideThemeColors(slideData);
+        pptSlide.background = { color: colors.bg };
+
+        // Generic title
+        addTitleBlock(pptSlide, slideData.title || slideData.heading, colors);
+
+        let handledNatively = false;
+
+        switch (slideData.template) {
+          case 'cover': {
+            if (slideData.subheading) {
+              pptSlide.addText(slideData.subheading, {
+                x: 0.5,
+                y: 1.2,
+                w: 9,
+                h: 0.6,
+                fontSize: 20,
+                color: colors.text,
+              });
+            }
+            if (slideData.tagline) {
+              pptSlide.addText(slideData.tagline, {
+                x: 0.5,
+                y: 1.8,
+                w: 9,
+                h: 0.6,
+                fontSize: 18,
+                color: colors.accent,
+              });
+            }
+            if (Array.isArray(slideData.highlights)) {
+              addBulletBlock(pptSlide, slideData.highlights, { x: 0.7, y: 2.6, w: 8.6, h: 2.5 }, colors);
+            }
+            handledNatively = true;
+            break;
+          }
+          case 'agenda': {
+            const cols = slideData.columns || [];
+            if (cols[0]) {
+              addBulletBlock(pptSlide, cols[0], { x: 0.7, y: 1.5, w: 4.1, h: 3.6 }, colors);
+            }
+            if (cols[1]) {
+              addBulletBlock(pptSlide, cols[1], { x: 5.0, y: 1.5, w: 4.1, h: 3.6 }, colors);
+            }
+            handledNatively = true;
+            break;
+          }
+          case 'cards': {
+            if (Array.isArray(slideData.cards)) {
+              const gap = 0.3;
+              const cardW = (9 - gap * 2) / 3;
+              slideData.cards.slice(0, 3).forEach((c, idx) => {
+                const x = 0.5 + idx * (cardW + gap);
+                pptSlide.addShape(pres.ShapeType.roundRect, {
+                  x,
+                  y: 1.6,
+                  w: cardW,
+                  h: 2.2,
+                  fill: { color: 'FFFFFF' },
+                  line: { color: colors.accent, width: 1.5 },
+                  shadow: { type: 'outer', opacity: 0.2, blur: 4 },
+                });
+                if (c.headline) {
+                  pptSlide.addText(c.headline, {
+                    x: x + 0.3,
+                    y: 1.8,
+                    w: cardW - 0.6,
+                    h: 0.6,
+                    fontSize: 22,
+                    bold: true,
+                    color: colors.text,
+                  });
+                }
+                if (c.caption) {
+                  pptSlide.addText(c.caption, {
+                    x: x + 0.3,
+                    y: 2.4,
+                    w: cardW - 0.6,
+                    h: 0.6,
+                    fontSize: 14,
+                    color: colors.text,
+                  });
+                }
+              });
+            }
+            if (Array.isArray(slideData.bulletList)) {
+              addBulletBlock(pptSlide, slideData.bulletList, { x: 0.7, y: 4.0, w: 8.6, h: 1.4 }, colors);
+            }
+            handledNatively = true;
+            break;
+          }
+          case 'problem': {
+            if (slideData.statement) {
+              pptSlide.addText(slideData.statement, {
+                x: 0.5,
+                y: 1.1,
+                w: 9,
+                h: 0.6,
+                fontSize: 18,
+                italic: true,
+                color: colors.accent,
+              });
+            }
+            const cols = slideData.columns || [];
+            if (cols[0]?.points) {
+              addBulletBlock(pptSlide, cols[0].points, { x: 0.7, y: 1.9, w: 4.1, h: 3.2 }, colors);
+            }
+            if (cols[1]?.points) {
+              addBulletBlock(pptSlide, cols[1].points, { x: 5.0, y: 1.9, w: 4.1, h: 3.2 }, colors);
+            }
+            if (slideData.footer) {
+              pptSlide.addText(slideData.footer, {
+                x: 0.5,
+                y: 5.2,
+                w: 9,
+                h: 0.4,
+                fontSize: 12,
+                color: colors.text,
+              });
+            }
+            handledNatively = true;
+            break;
+          }
+          case 'objectives': {
+            const goals = slideData.goals || [];
+            addBulletBlock(
+              pptSlide,
+              goals.map((g) => `${g.title}: ${g.description}`),
+              { x: 0.7, y: 1.5, w: 8.6, h: 3.6 },
+              colors
+            );
+            handledNatively = true;
+            break;
+          }
+          default:
+            handledNatively = false;
+        }
+
+        // For templates not yet mapped natively, fall back to image to preserve style
+        if (!handledNatively) {
+          goTo(i);
+          await wait(150);
+          const img = await captureCurrentStageAsImage();
+          if (img) {
+            pptSlide.addImage({ data: img, x: 0, y: 0, w: '100%', h: '100%' });
+          }
+        }
+      }
+
+      // Try native download; fallback to manual blob download
+      try {
+        await pres.writeFile({ fileName: filename });
+      } catch (e) {
+        if (typeof pres.write === 'function') {
+          const blob = await pres.write('blob');
+          if (blob) {
+            downloadBlob(blob, filename);
+          } else {
+            const arrayBuffer = await pres.write('arraybuffer');
+            const mime =
+              'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+            const abBlob = new Blob([arrayBuffer], { type: mime });
+            downloadBlob(abBlob, filename);
+          }
+        } else {
+          throw e;
+        }
+      }
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -1310,13 +1769,79 @@ const WafacashPresentation = () => {
     <div className="presentation-root">
 
 
-      <main className="presentation-stage">
+      <main ref={stageRef} className="presentation-stage">
         <SlideRenderer slide={activeSlide} />
       </main>
 
+      {/* Export actions (top-right) */}
+      {!isExporting && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 12,
+            right: 12,
+            display: 'flex',
+            gap: 8,
+            zIndex: 1200,
+          }}
+        >
+        <button
+          type="button"
+            onClick={exportAsPdf}
+            style={{
+              padding: '8px 12px',
+              background: PALETTE.yellow,
+              color: PALETTE.black,
+              border: 'none',
+              borderRadius: 8,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              fontWeight: 600,
+            }}
+            title="Exporter en PDF"
+          >
+            Export PDF
+        </button>
+          <button
+            type="button"
+            onClick={exportAsPptx}
+            style={{
+              padding: '8px 12px',
+              background: PALETTE.yellow,
+              color: PALETTE.black,
+              border: 'none',
+              borderRadius: 8,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              fontWeight: 600,
+            }}
+            title="Exporter en PPTX (natif — texte et formes)"
+          >
+            Export PPTX (natif)
+          </button>
+          <button
+            type="button"
+            onClick={exportAsPptxImage}
+            style={{
+              padding: '8px 12px',
+              background: PALETTE.yellow,
+              color: PALETTE.black,
+              border: 'none',
+              borderRadius: 8,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              fontWeight: 600,
+            }}
+            title="Exporter en PPTX (image — capture d’écran de chaque slide)"
+          >
+            Export PPTX (image)
+          </button>
+        </div>
+      )}
+
       {/* Overlay navigation arrows (center left/right) */}
-      <button
-        type="button"
+      {!isExporting && <button
+          type="button"
         aria-label="Diapo précédente"
         onClick={() => goTo(currentSlide - 1)}
         disabled={currentSlide === 0}
@@ -1342,13 +1867,13 @@ const WafacashPresentation = () => {
         title="Précédent (←)"
       >
         <ChevronLeft size={20} />
-      </button>
+      </button>}
 
-      <button
+      {!isExporting && <button
         type="button"
         aria-label="Diapo suivante"
-        onClick={() => goTo(currentSlide + 1)}
-        disabled={currentSlide === totalSlides - 1}
+          onClick={() => goTo(currentSlide + 1)}
+          disabled={currentSlide === totalSlides - 1}
         style={{
           position: 'fixed',
           top: '50%',
@@ -1371,9 +1896,9 @@ const WafacashPresentation = () => {
         title="Suivant (→)"
       >
         <ChevronRight size={20} />
-      </button>
+      </button>}
 
-      <div
+      {!isExporting && <div
         className="presentation-footer"
         style={{
           position: 'fixed',
@@ -1411,7 +1936,7 @@ const WafacashPresentation = () => {
             />
           ))}
         </div>
-      </div>
+      </div>}
     </div>
   );
 };
