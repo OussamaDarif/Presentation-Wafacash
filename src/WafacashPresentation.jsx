@@ -342,21 +342,8 @@ const slideDeck = [
     id: 'demo-dashboard',
     template: 'demo',
     background: 'white',
-    title: 'Démonstration — Dashboard de suivi PayCash',
+    title: 'Démonstration — Détails du fichier traité',
     image: `${process.env.PUBLIC_URL}/detail-screenshot.png`,
-    // demoHighlights: [
-    //   'Filtrage par adhérent, date et statut en direct',
-    //   'Statuts visuels : Validé, En cours, Rejeté',
-    //   'Actions rapides : Détails, export, reçus PDF',
-    // ],
-    // export: {
-    //   title: 'Démo Dashboard',
-    //   bullets: [
-    //     'Supervision temps réel des fichiers reçus',
-    //     'Filtres avancés et statuts visuels',
-    //     'Accès rapide aux détails et exports PDF',
-    //   ],
-    // },
   },
   {
     id: 'demo-pdf',
