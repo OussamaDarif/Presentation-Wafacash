@@ -1382,6 +1382,7 @@ const WafacashPresentation = () => {
           bottom: 4,
           background: 'transparent',
           borderRadius: 999,
+          marginTop: 10,
           padding: '6px 10px',
           zIndex: 1000,
         }}
