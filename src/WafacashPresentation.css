@@ -275,6 +275,138 @@
   margin-top: 8px;
 }
 
+.architecture-schema {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  border: 2px solid var(--brand-black);
+  border-radius: 24px;
+  padding: 28px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.08);
+}
+
+.architecture-schema__header {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--brand-dark);
+}
+
+.architecture-schema__body {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+.architecture-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: rgba(255, 209, 0, 0.12);
+  border: 2px solid var(--brand-yellow);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+.architecture-panel__title {
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.architecture-panel__section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.architecture-panel__label {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brand-dark);
+}
+
+.architecture-panel__value {
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.architecture-panel__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.architecture-panel__list li {
+  position: relative;
+  padding-left: 18px;
+}
+
+.architecture-panel__list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--brand-black);
+  font-weight: 700;
+}
+
+.architecture-bridge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 18px;
+  border: 2px dashed var(--brand-black);
+  padding: 24px 16px;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.architecture-bridge__title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.architecture-bridge__icon {
+  font-size: 36px;
+}
+
+.architecture-bridge__caption {
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.6;
+  color: var(--brand-dark);
+}
+
+.architecture-schema__footer {
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+  padding: 16px 12px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .diagram-sequence {
   display: flex;
   flex-direction: column;

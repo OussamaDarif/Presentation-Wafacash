@@ -1,6 +1,6 @@
+import html2canvas from 'html2canvas';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
 import './WafacashPresentation.css';
 
 const PALETTE = {
@@ -237,28 +237,38 @@ const slideDeck = [
     id: 'architecture',
     template: 'architecture',
     background: 'white',
-    title: 'Architecture Technique MVVM — 3 couches synchronisées',
-    layers: [
-      {
-        tag: 'Client',
-        caption: 'Interface WPF • Vue & ViewModel • Dashboard • PDF',
+    title: 'Architecture Technique',
+    schema: {
+      left: {
+        title: 'Integra BO',
+        architecture: 'MVVM',
+        components: [
+          'Client — Interface WPF (Views & ViewModels, dashboard)',
+          'Common — DTOs & services partagés',
+          'Server — Logique métier & accès SQL Server',
+        ],
       },
-      {
-        tag: 'Common',
-        caption: 'Services transverses • DTOs • Validation • Config',
-        muted: true,
+      bridge: {
+        title: 'SQL Server',
+        caption: 'Canal de synchronisation ↔ Le Worker insère • Integra BO consulte',
       },
-      {
-        tag: 'Server',
-        caption: 'Worker Service • DAL SQL Server • BLL • API SOAP BINGA',
+      right: {
+        title: 'Worker Service',
+        architecture: 'Services orchestrés',
+        components: [
+          'Models — DataFileIntegration, IntegrationFile, IntegrationData',
+          'Services — ExcelProcessor, SoapClientService, PdfGeneratorService',
+          'Worker.cs — Orchestrateur (FileSystemWatcher, erreurs, logging)',
+        ],
       },
-    ],
+    },
     export: {
-      title: 'Architecture MVVM',
+      title: 'Architecture technique',
       bullets: [
-        'Client WPF (MVVM) pour la supervision',
-        'Couche commune mutualisée (services & DTOs)',
-        'Worker Service + DAL SQL + Intégration BINGA',
+        'Integra BO : client MVVM (Client/Common/Server) pour la consultation',
+        'Worker Service : Models, Services, Worker.cs pour le traitement automatisé',
+        'SQL Server : synchronisation temps réel entre les deux systèmes',
+        'Architecture bicéphale : indépendante, scalable, maintenable et fiable',
       ],
     },
   },
@@ -524,16 +534,16 @@ const slideDeck = [
       },
       {
         label: 'Moyen terme',
-        items: ['Dépôt direct sécurisé', 'API REST moderne', 'Application mobile'],
+        items: ['Dépôt direct sécurisé', 'Automatiser la validation'],
       },
       {
         label: 'Long terme',
-        items: ['IA pour détection d’anomalies', 'Blockchain pour traçabilité', 'Automatisation totale'],
+        items: ['Portail dédié', 'Automatisation totale'],
       },
     ],
     addOns: [
       'Extension internationale : Sénégal, Cameroun, Tunisie…',
-      'Intégration future avec les modules Wafacash (Jibi, Hissab Bikhir)',
+   
       'Business Intelligence pour la direction',
     ],
     export: {
@@ -624,9 +634,9 @@ const slideDeck = [
       '14 Novembre 2025',
     ],
     jury: [
+      { name: 'Samira NAFAKH LAZRAQ', role: 'Directrice du Pôle Ventes & Distribution' },
       { name: 'Anas NAHILI', role: 'Directeur SI & Digitalisation' },
-      { name: 'Membre 2', role: 'Membre du jury' },
-      { name: 'Membre 3', role: 'Membre du jury' },
+      { name: 'Mohamed Karim RATBY', role: 'Membre du jury' },
       { name: 'Zakaria Belyazid', role: 'Responsable RH' },
     ],
     export: {
@@ -917,25 +927,42 @@ const SlideRenderer = ({ slide }) => {
         <SlideWrapper slide={slide}>
           <TitleBlock title={slide.title} />
           <div className="slide-content">
-            <div className="diagram-grid">
-              {slide.layers.map((layer, idx) => (
-                <div
-                  key={idx}
-                  className="diagram-node"
-                  style={{
-                    background: layer.muted ? PALETTE.light : PALETTE.white,
-                  }}
-                >
-                  <div className="diagram-node__label">{layer.tag}</div>
-                  <div className="diagram-node__title">{layer.caption}</div>
+            <div className="architecture-schema">
+              <div className="architecture-schema__header">{slide.schema?.header}</div>
+              <div className="architecture-schema__body">
+                <div className="architecture-panel">
+                  <div className="architecture-panel__title">{slide.schema?.left?.title}</div>
+                  <div className="architecture-panel__section">
+                    <span className="architecture-panel__label">Architecture</span>
+                    <span className="architecture-panel__value">{slide.schema?.left?.architecture}</span>
+                  </div>
+                  <ul className="architecture-panel__list">
+                    {slide.schema?.left?.components?.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+
                 </div>
-              ))}
-            </div>
-            <div
-              className="callout"
-              style={{ background: 'rgba(0,0,0,0.86)', color: PALETTE.white, border: 'none' }}
-            >
-              Architecture MVVM : séparation claire, maintenabilité maximale.
+
+                <div className="architecture-bridge">
+                  <div className="architecture-bridge__title">{slide.schema?.bridge?.title}</div>
+                  <div className="architecture-bridge__icon">⇆</div>
+                  <div className="architecture-bridge__caption">{slide.schema?.bridge?.caption}</div>
+                </div>
+
+                <div className="architecture-panel">
+                  <div className="architecture-panel__title">{slide.schema?.right?.title}</div>
+                  <div className="architecture-panel__section">
+                    <span className="architecture-panel__label">Architecture</span>
+                    <span className="architecture-panel__value">{slide.schema?.right?.architecture}</span>
+                  </div>
+                  <ul className="architecture-panel__list">
+                    {slide.schema?.right?.components?.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </SlideWrapper>
