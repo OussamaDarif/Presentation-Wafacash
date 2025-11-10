@@ -349,7 +349,7 @@ const slideDeck = [
     id: 'demo-pdf',
     template: 'receipt',
     background: 'white',
-    title: 'Génération automatique des reçus PDF',
+    title: 'Génération des reçus PDF',
     image: `${process.env.PUBLIC_URL}/receipt-screenshot.png`,
   },
   {
@@ -611,39 +611,29 @@ const slideDeck = [
     },
   },
   {
-    id: 'annex',
-    template: 'annex',
-    background: 'white',
-    title: 'Annexe technique — structure & composants',
-    sections: [
-      {
-        heading: 'Structure du projet',
-        items: ['PayCash.Client (WPF)', 'PayCash.Common (DTOs)', 'PayCash.Server (Worker)', 'PayCash.Data (SQL)'],
-      },
-      {
-        heading: 'Composants clés',
-        items: [
-          'FileSystemWatcher — détection automatique',
-          'ExcelProcessor — lecture & validation',
-          'SOAP Client — appels FindOrder',
-          'PDF Generator — reçus automatiques',
-        ],
-      },
-      {
-        heading: 'Sécurité',
-        items: ['Authentification intégrée', 'Audit trail détaillé', 'Validation des données critiques'],
-      },
-      {
-        heading: 'Performance',
-        items: ['Traitement asynchrone', 'Pooling des connexions', 'Cache intelligent'],
-      },
+    id: 'cover',
+    template: 'cover',
+    background: 'black',
+    heading: 'Refonte du Module PayCash',
+    subheading: 'Intégration en Masse',
+    tagline: "Dédié Pour Paiements des Frais d'Immatriculation",
+    highlights: [
+      'Réalisé par : Oussama DARIF',
+      'Encadré par : Mme Mouna SAIH / M. Anas NAHILI',
+      '14 Novembre 2025',
+    ],
+    jury: [
+      { name: 'Anas NAHILI', role: 'Directeur SI & Digitalisation' },
+      { name: 'Membre 2', role: 'Membre du jury' },
+      { name: 'Membre 3', role: 'Membre du jury' },
+      { name: 'Zakaria Belyazid', role: 'Responsable RH' },
     ],
     export: {
-      title: 'Annexe technique',
+      title: 'Refonte du Module PayCash',
+      subtitle: 'Intégration en Masse',
       bullets: [
-        'Structure solution : Client, Common, Server, Data',
-        'Composants : FileWatcher, ExcelProcessor, SOAP, PDF',
-        'Sécurité & performance : audit trail, caching, asynchrone',
+        "Automatisation & Traçabilité des Paiements d'Immatriculation",
+        'Oussama DARIF – 14 Novembre 2025',
       ],
     },
   },
