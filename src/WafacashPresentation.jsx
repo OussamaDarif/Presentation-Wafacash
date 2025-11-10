@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import './WafacashPresentation.css';
 
 const PALETTE = {
@@ -1267,6 +1267,45 @@ const WafacashPresentation = () => {
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const tag = (e.target && e.target.tagName) || '';
+      // Ignore when typing in inputs/textareas to avoid hijacking typing
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.isComposing) {
+        return;
+      }
+
+      switch (e.key) {
+        case 'ArrowRight':
+        case 'PageDown':
+        case ' ':
+          e.preventDefault();
+          goTo(currentSlide + 1);
+          break;
+        case 'ArrowLeft':
+        case 'PageUp':
+          e.preventDefault();
+          goTo(currentSlide - 1);
+          break;
+        case 'Home':
+          e.preventDefault();
+          goTo(0);
+          break;
+        case 'End':
+          e.preventDefault();
+          goTo(totalSlides - 1);
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [currentSlide, totalSlides]);
+
   return (
     <div className="presentation-root">
 
@@ -1275,33 +1314,78 @@ const WafacashPresentation = () => {
         <SlideRenderer slide={activeSlide} />
       </main>
 
-      <footer className="presentation-footer">
-        <button
-          type="button"
-          className="footer-nav-button"
-          onClick={() => goTo(currentSlide - 1)}
-          disabled={currentSlide === 0}
-        >
-          <ChevronLeft size={18} />
-          Précédent
-        </button>
+      {/* Overlay navigation arrows (center left/right) */}
+      <button
+        type="button"
+        aria-label="Diapo précédente"
+        onClick={() => goTo(currentSlide - 1)}
+        disabled={currentSlide === 0}
+        style={{
+          position: 'fixed',
+          top: '50%',
+          left: 8,
+          transform: 'translateY(-50%)',
+          width: 44,
+          height: 44,
+          borderRadius: 999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: PALETTE.yellow,
+          color: PALETTE.black,
+          border: 'none',
+          cursor: currentSlide === 0 ? 'default' : 'pointer',
+          opacity: currentSlide === 0 ? 0.3 : 1,
+          zIndex: 1000,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        }}
+        title="Précédent (←)"
+      >
+        <ChevronLeft size={20} />
+      </button>
 
-        <div className="presentation-tip">
-          Slide {currentSlide + 1} / {totalSlides} • Utilisez les flèches du clavier pour naviguer
-        </div>
+      <button
+        type="button"
+        aria-label="Diapo suivante"
+        onClick={() => goTo(currentSlide + 1)}
+        disabled={currentSlide === totalSlides - 1}
+        style={{
+          position: 'fixed',
+          top: '50%',
+          right: 8,
+          transform: 'translateY(-50%)',
+          width: 44,
+          height: 44,
+          borderRadius: 999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: PALETTE.yellow,
+          color: PALETTE.black,
+          border: 'none',
+          cursor: currentSlide === totalSlides - 1 ? 'default' : 'pointer',
+          opacity: currentSlide === totalSlides - 1 ? 0.3 : 1,
+          zIndex: 1000,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        }}
+        title="Suivant (→)"
+      >
+        <ChevronRight size={20} />
+      </button>
 
-        <button
-          type="button"
-          className="footer-nav-button"
-          onClick={() => goTo(currentSlide + 1)}
-          disabled={currentSlide === totalSlides - 1}
-        >
-          Suivant
-          <ChevronRight size={18} />
-        </button>
-      </footer>
-
-      <div className="presentation-footer" style={{ background: 'rgba(0,0,0,0.04)' }}>
+      <div
+        className="presentation-footer"
+        style={{
+          position: 'fixed',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          bottom: 4,
+          background: 'transparent',
+          borderRadius: 999,
+          padding: '6px 10px',
+          zIndex: 1000,
+        }}
+      >
         <div className="slide-progress">
           {slides.map((_, idx) => (
             <button
@@ -1316,6 +1400,13 @@ const WafacashPresentation = () => {
                 .join(' ')}
               onClick={() => goTo(idx)}
               title={`Aller à la slide ${idx + 1}`}
+              style={{
+                background:
+                  idx === currentSlide || idx < currentSlide
+                    ? PALETTE.yellow
+                    : 'rgba(255,209,0,0.35)',
+                border: `1px solid ${PALETTE.yellow}`,
+              }}
             />
           ))}
         </div>
