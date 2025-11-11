@@ -48,9 +48,9 @@ const slideDeck = [
     ],
     jury: [
       { name: 'Anas NAHILI', role: 'Directeur SI & Digitalisation' },
-      { name: 'Samira Lazraq', role: 'Directrice Business & Développement' },
+      { name: 'NAFAKH LAZRAQ', role: 'Directrice Business & Développement' },
       { name: 'Mohamed Karim RATBY', role: 'Directeur Finances & Administratif' },
-      { name: 'Zakaria Belyazid', role: 'Responsable  développement RH' },
+      { name: 'Zakaria BELYAZID', role: 'Responsable développement RH' },
     ],
     export: {
       title: 'Refonte du Module PayCash',
@@ -627,9 +627,8 @@ const slideDeck = [
       '13 Novembre 2025',
     ],
     jury: [
-      { name: 'Samira NAFAKH LAZRAQ', role: 'Directrice du Pôle Ventes & Distribution' },
       { name: 'Anas NAHILI', role: 'Directeur SI & Digitalisation' },
-      { name: 'Samira Lazraq', role: 'Directrice Business & Développement' },
+      { name: 'Samira NAFAKH LAZRAQ', role: 'Directrice Business & Développement' },
       { name: 'Mohamed Karim Ratby', role: 'Directeur Finances & Administratif' },
       { name: 'Zakaria Belyazid', role: 'Responsable  développement RH' },
     ],
