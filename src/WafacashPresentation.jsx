@@ -455,26 +455,19 @@ const slideDeck = [
     background: 'black',
     title: 'Résultats obtenus',
     metrics: [
-      { value: '100%', label: 'Automatisation du processus' },
+      { value: '80%', label: 'Automatisation du processus' },
       { value: '0', label: 'Doublons ou erreurs résiduelles' },
-      { value: '-80%', label: 'Temps de traitement' },
+      { value: '-70%', label: 'Temps de traitement' },
     ],
     comparisons: [
-      {
-        heading: 'Temps de traitement',
-        items: ['Avant : 2h par lot', 'Après : 24 min'],
-      },
-      {
-        heading: 'Taux d’erreurs',
-        items: ['Avant : 15%', 'Après : contrôles embarqués'],
-      },
+
     ],
     export: {
       title: 'Résultats clés',
       bullets: [
         'Automatisation complète du flux PayCash',
         'Erreur/doublon éliminés, qualité garantie',
-        'Temps de traitement réduit de 80%',
+        'Temps de traitement réduit de 70%',
       ],
     },
   },
@@ -621,20 +614,20 @@ const slideDeck = [
     highlights: [
       'Réalisé par : Oussama DARIF',
       'Encadré par : Mme Mouna SAIH / M. Anas NAHILI',
-      '14 Novembre 2025',
+      '13 Novembre 2025',
     ],
     jury: [
       { name: 'Anas NAHILI', role: 'Directeur SI & Digitalisation' },
-      { name: 'Membre 2', role: 'Membre du jury' },
-      { name: 'Membre 3', role: 'Membre du jury' },
-      { name: 'Zakaria Belyazid', role: 'Responsable RH' },
+      { name: 'Samira Lazraq', role: 'Directrice Business & Développement' },
+      { name: 'Mohamed Karim Ratby', role: 'Directeur Finances & Administratif' },
+      { name: 'Zakaria Belyazid', role: 'Responsable  développement RH' },
     ],
     export: {
       title: 'Refonte du Module PayCash',
       subtitle: 'Intégration en Masse',
       bullets: [
         "Automatisation & Traçabilité des Paiements d'Immatriculation",
-        'Oussama DARIF – 14 Novembre 2025',
+        'Oussama DARIF – 13 Novembre 2025',
       ],
     },
   },
@@ -1367,7 +1360,7 @@ const WafacashPresentation = () => {
         : '#ffffff';
 
     const canvas = await html2canvas(node, {
-      scale: 3,
+      scale: 2, // reduce memory footprint to avoid dataURL overflow
       backgroundColor: bgColor,
       useCORS: true,
       allowTaint: false,
@@ -1375,7 +1368,8 @@ const WafacashPresentation = () => {
       logging: false,
       foreignObjectRendering: false,
     });
-    return canvas.toDataURL('image/png');
+    // Prefer JPEG to reduce dataURL size, which helps avoid "Invalid string length"
+    return canvas.toDataURL('image/jpeg', 0.88);
   };
 
   const exportAsPdf = async () => {
@@ -1439,16 +1433,32 @@ const WafacashPresentation = () => {
       try {
         pdf.save(filename);
       } catch {
-        // Fallback: manual Blob download
-        const blob = pdf.output('blob');
-        const url = URL.createObjectURL(blob);
+        // Fallback: manual Blob download (guard types across jsPDF builds)
+        let blob;
+        try {
+          const maybeBlob = await pdf.output('blob');
+          if (maybeBlob && typeof maybeBlob === 'object' && typeof maybeBlob.size === 'number') {
+            blob = maybeBlob;
+          }
+        } catch {
+          // ignore and try arraybuffer
+        }
+        if (!blob) {
+          const ab = await pdf.output('arraybuffer');
+          blob = new Blob([ab], { type: 'application/pdf' });
+        }
+        const url = (typeof pdf.output === 'function' && typeof pdf.output('bloburl') === 'string')
+          ? pdf.output('bloburl')
+          : URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = filename;
         document.body.appendChild(a);
         a.click();
         a.remove();
-        URL.revokeObjectURL(url);
+        if (!url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
       } finally {
         // Restore original slide
         goTo(originalIndex);
