@@ -48,9 +48,9 @@ const slideDeck = [
     ],
     jury: [
       { name: 'Anas NAHILI', role: 'Directeur SI & Digitalisation' },
-      { name: 'Membre 2', role: 'Membre du jury' },
-      { name: 'Membre 3', role: 'Membre du jury' },
-      { name: 'Zakaria Belyazid', role: 'Responsable RH' },
+      { name: 'Samira Lazraq', role: 'Directrice Business & Développement' },
+      { name: 'Mohamed Karim RATBY', role: 'Directeur Finances & Administratif' },
+      { name: 'Zakaria Belyazid', role: 'Responsable  développement RH' },
     ],
     export: {
       title: 'Refonte du Module PayCash',
@@ -330,7 +330,7 @@ const slideDeck = [
       { label: 'Backend', content: 'C#, .NET, Worker Service, Entity Framework' },
       { label: 'Frontend', content: 'WPF, MVVM, Data Binding avancé' },
       { label: 'Database', content: 'SQL Server, Stored Procedures, optimisation requêtes' },
-      { label: 'API & Outils', content: 'SOAP BINGA, SoapUI, Azure DevOps, Git' },
+      { label: 'API & Outils', content: 'SoapUI, Azure DevOps' },
     ],
     export: {
       title: 'Technologies',
@@ -338,7 +338,7 @@ const slideDeck = [
         'Stack .NET / C# / Worker Service',
         'Client WPF MVVM, Data Binding',
         'SQL Server & procédures stockées',
-        'SoapUI, Azure DevOps, Git',
+        'SoapUI, Azure DevOps',
       ],
     },
   },
@@ -447,8 +447,8 @@ const slideDeck = [
     ],
     supports: [
       'Outils : Azure DevOps, Git, Gantt de pilotage',
-      'Collaboration : Support TMA, métiers, concessionnaires',
-      'Livrables : documentation, guide utilisateur, rapport final',
+      'Collaboration : Support TMA, métiers',
+      'Livrables : documentation, rapport final',
     ],
     export: {
       title: 'Méthodologie',
