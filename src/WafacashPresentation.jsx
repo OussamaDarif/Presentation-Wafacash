@@ -212,7 +212,7 @@ const slideDeck = [
     id: 'solution',
     template: 'solution',
     background: 'white',
-    title: 'PayCash 2.0 — La solution cible',
+    title: 'PayCash — La solution cible',
     flow: [
       { label: 'Concessionnaire', description: 'Dépôt sécurisé des lots' },
       { label: 'Worker Service', description: 'Détection & orchestration' },
@@ -225,7 +225,7 @@ const slideDeck = [
       { label: 'Fiabilité renforcée', description: 'Contrôles qualité & gestion d’erreurs' },
     ],
     export: {
-      title: 'Solution PayCash 2.0',
+      title: 'Solution PayCash',
       bullets: [
         'Dépôt automatisé des fichiers concessionnaires',
         'Worker orchestrateur + API BINGA pour validation',
@@ -505,13 +505,13 @@ const slideDeck = [
         inverted: true,
       },
     ],
-    quote: 'PayCash 2.0 : un système moderne, fiable et évolutif au service du réseau Wafacash',
+    quote: 'PayCash : un système moderne, fiable et évolutif au service du réseau Wafacash',
     export: {
       title: 'Impacts & bénéfices',
       bullets: [
         'Gains opérationnels : productivité, scalabilité, qualité',
         'Gains business : satisfaction, conformité, image de marque',
-        'PayCash 2.0 sécurise l’activité et prépare l’avenir',
+        'PayCash sécurise l’activité et prépare l’avenir',
       ],
     },
   },
@@ -573,13 +573,13 @@ const slideDeck = [
       { icon: '✓', label: 'Manuel → Automatisé' },
       { icon: '✓', label: 'Opaque → Traçable' },
     ],
-    banner: 'PayCash 2.0 : Fiabilité • Performance • Évolutivité',
+    banner: 'PayCash : Fiabilité • Performance • Évolutivité',
     export: {
       title: 'Conclusion',
       bullets: [
         'En 3 mois : transformation complète du module PayCash',
         'Legacy remplacé par un système moderne, automatisé et traçable',
-        'PayCash 2.0 : fiabilité, performance et évolutivité',
+        'PayCash : fiabilité, performance et évolutivité',
       ],
     },
   },
