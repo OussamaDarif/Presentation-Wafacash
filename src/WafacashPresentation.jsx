@@ -461,23 +461,41 @@ const slideDeck = [
   },
   {
     id: 'results',
-    template: 'impact',
+    template: 'featureGrid',
     background: 'black',
     title: 'Résultats obtenus',
-    metrics: [
-      { value: '80%', label: 'Automatisation du processus' },
-      { value: '0', label: 'Doublons ou erreurs résiduelles' },
-      { value: '-70%', label: 'Temps de traitement' },
-    ],
-    comparisons: [
-
+    features: [
+      {
+        heading: 'Processus maîtrisé',
+        points: [
+          'Automatisation continue des traitements',
+          'Supervision consolidée dans un tableau de bord unique',
+          'Suivi des dossiers fiabilisé pour les équipes BO',
+        ],
+      },
+      {
+        heading: 'Qualité renforcée',
+        points: [
+          'Réduction drastique des erreurs humaines',
+          'Contrôles métier appliqués de bout en bout',
+          'Historique complet pour chaque opération sensible',
+        ],
+      },
+      {
+        heading: 'Expérience améliorée',
+        points: [
+          'Temps de prise en charge significativement raccourci',
+          'Génération automatique et archivage des reçus',
+          'Visibilité temps réel pour répondre aux concessionnaires',
+        ],
+      },
     ],
     export: {
       title: 'Résultats clés',
       bullets: [
-        'Automatisation complète du flux PayCash',
-        'Erreur/doublon éliminés, qualité garantie',
-        'Temps de traitement réduit de 70%',
+        'Automatisation du flux PayCash et pilotage centralisé',
+        'Contrôles renforcés assurant une qualité homogène',
+        'Expérience plus fluide pour le réseau et le back office',
       ],
     },
   },
@@ -492,7 +510,7 @@ const slideDeck = [
         items: [
           'Productivité renforcée des équipes BO',
           'Suppression des saisies répétitives',
-          'Traitement x10 du volume sans friction',
+          'Capacité accrue pour absorber les pics de charge',
         ],
       },
       {
@@ -509,7 +527,7 @@ const slideDeck = [
     export: {
       title: 'Impacts & bénéfices',
       bullets: [
-        'Gains opérationnels : productivité, scalabilité, qualité',
+        'Gains opérationnels : productivité, agilité, qualité',
         'Gains business : satisfaction, conformité, image de marque',
         'PayCash sécurise l’activité et prépare l’avenir',
       ],
@@ -964,13 +982,19 @@ const SlideRenderer = ({ slide }) => {
     case 'featureGrid':
       return (
         <SlideWrapper slide={slide}>
-          <TitleBlock title={slide.title} />
+          <TitleBlock title={slide.title} theme={slide.background === 'black' ? 'dark' : 'light'} />
           <div className="slide-content">
             <div className="grid-two">
               {slide.features.map((feature, idx) => (
-                <div key={idx} className="callout">
+                <div
+                  key={idx}
+                  className={`callout${slide.background === 'black' ? ' callout--dark' : ''}`}
+                >
                   <strong>{feature.heading}</strong>
-                  <BulletList items={feature.points} />
+                  <BulletList
+                    items={feature.points}
+                    tone={slide.background === 'black' ? 'light' : 'dark'}
+                  />
                 </div>
               ))}
             </div>
