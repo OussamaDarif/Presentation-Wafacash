@@ -112,9 +112,78 @@ const slideDeck = [
     export: {
       title: 'Wafacash — Leader des Services Financiers',
       bullets: [
-        '+30 ans d’expertise, réseau national',
+        '+30 ans d\'expertise, réseau national',
         'Filiale Attijariwafa Bank, offres transfert & paiement',
         'Innovation continue et proximité clients',
+      ],
+    },
+  },
+  {
+    id: 'wafacash-products',
+    template: 'products',
+    background: 'white',
+    title: 'Produits de Wafacash',
+    products: [
+      {
+        name: 'Transfert d\'argent',
+        description: 'national et international',
+        icon: '💸',
+      },
+      {
+        name: 'Floussy',
+        description: 'carte électronique prépayée rechargeable',
+        icon: '💳',
+      },
+      {
+        name: 'Hissab Bikhir',
+        description: 'Le premier compte bancaire économique au MAROC',
+        icon: '🏦',
+      },
+      {
+        name: 'Change manuel',
+        description: 'Wafacash propose deux services liés au change Achat et Vente',
+        icon: '💱',
+      },
+      {
+        name: 'Paycash & Binga',
+        description: 'permettent d\'effectuer le paiement en espèces des commandes sur les sites de e-commerce',
+        icon: '🛒',
+      },
+      {
+        name: 'Jibi',
+        description: 'le premier compte de paiement mobile au Maroc lancé par un établissement de paiement',
+        icon: '📱',
+      },
+      {
+        name: 'Crédit',
+        description: 'avec deux produits principaux SalafCash et Prêt AL AMANA',
+        icon: '💰',
+      },
+    ],
+    export: {
+      title: 'Produits Wafacash',
+      bullets: [
+        'Transfert d\'argent, Floussy, Hissab Bikhir',
+        'Change manuel, Paycash & Binga, Jibi, Crédit',
+      ],
+    },
+  },
+  {
+    id: 'wafacash-values',
+    template: 'values',
+    background: 'white',
+    title: 'Valeurs de Wafacash',
+    values: [
+      { name: 'Performance', position: 'top-left' },
+      { name: 'Innovation', position: 'top-right' },
+      { name: 'Esprit d\'équipe', position: 'bottom-left' },
+      { name: 'Disponibilité', position: 'bottom-right' },
+    ],
+    export: {
+      title: 'Valeurs de Wafacash',
+      bullets: [
+        'Performance, Innovation',
+        'Esprit d\'équipe, Disponibilité',
       ],
     },
   },
@@ -1292,6 +1361,51 @@ const SlideRenderer = ({ slide }) => {
                   <BulletList items={section.items} />
                 </div>
               ))}
+            </div>
+          </div>
+        </SlideWrapper>
+      );
+
+    case 'products':
+      return (
+        <SlideWrapper slide={slide}>
+          <TitleBlock title={slide.title} />
+          <div className="slide-content">
+            <div className="products-grid">
+              {slide.products.map((product, idx) => (
+                <div key={idx} className="product-item">
+                  <div className="product-item__icon">{product.icon}</div>
+                  <div className="product-item__content">
+                    <div className="product-item__name">{product.name}</div>
+                    <div className="product-item__description">{product.description}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </SlideWrapper>
+      );
+
+    case 'values':
+      return (
+        <SlideWrapper slide={slide}>
+          <TitleBlock title={slide.title} />
+          <div className="slide-content">
+            <div className="values-diagram">
+              {/* Top row */}
+              <div className="values-diagram__box values-diagram__box--top-left">
+                {slide.values[0].name}
+              </div>
+              <div className="values-diagram__box values-diagram__box--top-right">
+                {slide.values[1].name}
+              </div>
+              {/* Bottom row */}
+              <div className="values-diagram__box values-diagram__box--bottom-left">
+                {slide.values[2].name}
+              </div>
+              <div className="values-diagram__box values-diagram__box--bottom-right">
+                {slide.values[3].name}
+              </div>
             </div>
           </div>
         </SlideWrapper>
